@@ -3,14 +3,19 @@ import random
 valores = []
 pesos = []
 
-with open("ks_4_0.txt", "r") as f:
+with open("ks_30_0.txt", "r") as f:
     for linea in f:
-        v, p = map(int, linea.split())
+        partes = linea.strip().split()
+        if len(partes) != 2:
+            continue
+        try:
+            v, p = map(int, partes)
+        except ValueError:
+            continue
         valores.append(v)
         pesos.append(p)
 
-capacidad = 1000
-
+capacidad = 1000000
 poblacion_tam = 20
 generaciones = 1000
 tasa_mutacion = 0.1
@@ -30,11 +35,10 @@ def crear_individuo():
     return [random.randint(0, 1) for _ in range(len(valores))]
 
 def seleccion(poblacion):
-    return random.choices(
-        poblacion,
-        weights=[fitness(ind) for ind in poblacion],
-        k=2
-    )
+    pesos_fitness = [fitness(ind) for ind in poblacion]
+    if sum(pesos_fitness) == 0:
+        return random.sample(poblacion, 2)
+    return random.choices(poblacion, weights=pesos_fitness, k=2)
 
 def cruce(padre1, padre2):
     punto = random.randint(1, len(padre1) - 1)
@@ -63,3 +67,5 @@ mejor = max(poblacion, key=fitness)
 print("Mejor individuo:", mejor)
 print("Valor total:", fitness(mejor))
 print("Peso total:", sum(pesos[i] for i in range(len(mejor)) if mejor[i] == 1))
+
+
